@@ -1,0 +1,5 @@
+x = 0
+y = x
+x = x + 1 
+LOOP x
+END
