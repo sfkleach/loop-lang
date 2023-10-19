@@ -77,18 +77,18 @@ class Body(Instruction):
         return f'BODY: {self._instructions}'
 
 def parseLine(line):
-    m = re.match(r''' *(\w+) *= *0 *$''', line)
+    m = re.match(r'''(\w+) *= *0$''', line)
     if m:
         x = m.group(1)
         return Token('ZERO', x)
 
-    m = re.match(r''' *(\w+) *= (\w+) *$''', line)
+    m = re.match(r'''(\w+) *= (\w+)$''', line)
     if m:
         x = m.group(1)
         y = m.group(2)
         return Token('SET', x, y)
     
-    m = re.match(r''' *(\w+) *= (\w+) *\+ *1 *$''', line)
+    m = re.match(r'''(\w+) *= (\w+) *\+ *1$''', line)
     if m:
         x = m.group(1)
         y = m.group(2)
@@ -97,12 +97,12 @@ def parseLine(line):
         else:
             raise Exception(f'Invalid increment: variables differ: {x} {y}')
 
-    m = re.match(r''' *LOOP[ ]+(\w+)[ ]*$''', line)
+    m = re.match(r'''LOOP[ ]+(\w+)$''', line)
     if m:
         x = m.group(1)
         return Token('LOOP', x)
     
-    if line.strip() == 'END':
+    if line == 'END':
         return Token('END')
 
     raise Exception(f'Invalid line: {line}')
