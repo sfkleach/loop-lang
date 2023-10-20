@@ -134,7 +134,8 @@ def readLoopProgram(tokens):
 def startLoopLang():
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--file', type=argparse.FileType('r'), help='LOOP code')
-    parser.add_argument('-x', '--extended', action='store_true', help='Enable eXtended LOOP syntax')
+    parser.add_argument('-x', '--extended', action='store_true', help='enable syntactic sugar')
+    parser.add_argument('-p', '--plus', action='store_true', help='enable LOOP+ extensions')
     args = parser.parse_args()
     program = readLoopProgram(getTokens(args.file))
     state = {}

@@ -1,8 +1,3 @@
-# This is a simple LOOP program.
+# This is a trivial LOOP program that calculates x=1.
 x = 0
-y = x
 x = x + 1 
-LOOP x
-    y = y + 1
-    y = y + 1
-END

@@ -1,0 +1,8 @@
+# This is a LOOP program is used for checking the "strict" syntax features.
+x = 0
+y = x
+x = x + 1 
+LOOP x
+    y = y + 1
+    y = y + 1
+END
