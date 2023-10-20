@@ -39,7 +39,11 @@ class Set(Instruction):
         self.y = y
 
     def execute(self, state):
-        state[self.x] = state[self.y]
+        try:
+            state[self.x] = state[self.y]
+        except KeyError:
+            state[self.y] = 0
+            state[self.x] = 0
 
     def __str__(self):
         return f'SET {self.x} {self.y}'
@@ -49,7 +53,10 @@ class Inc(Instruction):
         self.x = x
 
     def execute(self, state):
-        state[self.x] += 1
+        try:
+            state[self.x] += 1
+        except KeyError:
+            state[self.x] = 1
 
     def __str__(self):
         return f'INC {self.x}'
@@ -60,6 +67,8 @@ class Loop(Instruction):
         self._body = body
 
     def execute(self, state):
+        if self._count not in state:
+            state[self._count] = 0
         for i in range(state[self._count]):
             self._body.execute(state)
 
