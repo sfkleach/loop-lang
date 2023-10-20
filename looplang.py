@@ -22,15 +22,16 @@ class Instruction:
     def execute(self, state):
         ...
 
-class Zero(Instruction):
-    def __init__(self, x):
+class Init(Instruction):
+    def __init__(self, x, k):
         self.x = x
+        self._constant = k
 
     def execute(self, state):
-        state[self.x] = 0
+        state[self.x] = self._constant
 
     def __str__(self):
-        return f'ZERO {self.x}'
+        return f'INIT {self.x} {self._constant}'
     
 class Set(Instruction):
     def __init__(self, x, y):
@@ -76,11 +77,17 @@ class Body(Instruction):
     def __str__(self):
         return f'BODY: {self._instructions}'
 
-def parseLine(line):
-    m = re.match(r'''(_*[a-zA-Z][_\w]*) *= *0$''', line)
+def parseLine(line, *, extended, plus):
+    m = re.match(r'''(_*[a-zA-Z][_\w]*) *= *([\d]+)$''', line)
     if m:
-        x = m.group(1)
-        return Token('ZERO', x)
+        try:
+            x = m.group(1)
+            k = int(m.group(2))
+            if not extended and k:
+                raise Exception(f'Extended syntax only (hint: did you mean -x?): {line}')
+            return Token('INIT', x, k)
+        except ValueError:
+            raise Exception(f'Invalid initialisation: {line}')
 
     m = re.match(r'''(_*[a-zA-Z][_\w]*) *= (_*[a-zA-Z][_\w]*)$''', line)
     if m:
@@ -107,18 +114,18 @@ def parseLine(line):
 
     raise Exception(f'Invalid line: {line}')
 
-def getTokens(file):
+def getTokens(file, extended, plus):
     for line in file:
         line = line.strip()
         if line and line[0] == '#':
             continue
-        yield parseLine(line)
+        yield parseLine(line, extended=extended, plus=plus)
 
 def readLoopProgram(tokens):
     instructions = []
     for token in tokens:
-        if token.type == 'ZERO':
-            instructions.append(Zero(token.value[0]))
+        if token.type == 'INIT':
+            instructions.append(Init(token.value[0], token.value[1]))
         elif token.type == 'SET':
             instructions.append(Set(token.value[0], token.value[1]))
         elif token.type == 'INC':
@@ -137,7 +144,7 @@ def startLoopLang():
     parser.add_argument('-x', '--extended', action='store_true', help='enable syntactic sugar')
     parser.add_argument('-p', '--plus', action='store_true', help='enable LOOP+ extensions')
     args = parser.parse_args()
-    program = readLoopProgram(getTokens(args.file))
+    program = readLoopProgram(getTokens(args.file, args.extended, args.plus))
     state = {}
     program.execute(state)
     print(state)
