@@ -16,11 +16,20 @@ class Token:
     def __repr__(self):
         return str(self)
 
+class StopLoopLang(Exception):
+    pass
 
 class Instruction:
     @abstractmethod
     def execute(self, state):
         ...
+
+class Error(Instruction):
+    def execute(self, state):
+        raise StopLoopLang()
+
+    def __str__(self):
+        return f'ERROR'
 
 class Init(Instruction):
     def __init__(self, x, k):
@@ -120,6 +129,9 @@ def parseLine(line, *, extended, plus):
     
     if line == 'END':
         return Token('END')
+    
+    if plus and line == 'ERROR':
+        return Token('ERROR')
 
     raise Exception(f'Invalid line: {line}')
 
@@ -143,6 +155,8 @@ def readLoopProgram(tokens):
             instructions.append(Loop(token.value[0], readLoopProgram(tokens)))
         elif token.type == 'END':
             return Body(instructions)
+        elif token.type == 'ERROR':
+            return Error()
         else:
             raise Exception(f'Invalid token: {token}')
     return Body(instructions)
@@ -155,9 +169,11 @@ def startLoopLang():
     args = parser.parse_args()
     program = readLoopProgram(getTokens(args.file, args.extended, args.plus))
     state = {}
-    program.execute(state)
-    print(state)
-
+    try:
+        program.execute(state)
+        print(state)
+    except StopLoopLang:
+        print('++?????++ Out of Cheese Error. Redo From Start.')
 
 if __name__ == "__main__":
     startLoopLang()
