@@ -43,6 +43,10 @@ assign ::= register '=' register
 loop ::= 'LOOP' register statement* 'END'
 ```
 
+Register names must start with a letter and can contain letters, digits and 
+underscores. And they may be prefixed with any number of underscores. For 
+example, `x`, `_x` and `__x` are all valid register names but `1x` is not.
+
 In this initial implementation, each instruction must be on a separate line.
 Any line starting with a '#' is treated as a comment and is ignored.
 
