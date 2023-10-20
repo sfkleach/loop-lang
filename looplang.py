@@ -57,18 +57,20 @@ class Set(Instruction):
     def __str__(self):
         return f'SET {self.x} {self.y}'
     
-class Inc(Instruction):
-    def __init__(self, x):
-        self.x = x
+class Add(Instruction):
+    def __init__(self, x, y, k):
+        self._dst = x
+        self._src = y
+        self._delta = k
 
     def execute(self, state):
         try:
-            state[self.x] += 1
+            state[self._dst] = state[self._src] + self._delta
         except KeyError:
-            state[self.x] = 1
+            state[self._dst] = self._delta
 
     def __str__(self):
-        return f'INC {self.x}'
+        return f'ADD {self._dst}'
 
 class Loop(Instruction):
     def __init__(self, x, body):
@@ -113,12 +115,15 @@ def parseLine(line, *, extended, plus):
         y = m.group(2)
         return Token('SET', x, y)
     
-    m = re.match(r'''(_*[a-zA-Z][_\w]*) *= (_*[a-zA-Z][_\w]*) *\+ *1$''', line)
+    m = re.match(r'''(_*[a-zA-Z][_\w]*) *= (_*[a-zA-Z][_\w]*) *\+ *([\d]+)$''', line)
     if m:
         x = m.group(1)
         y = m.group(2)
-        if x == y:
-            return Token('INC', x)
+        k = m.group(3)
+        if x == y and k == '1':
+            return Token('ADD', x, x, 1)
+        elif extended:
+            return Token('ADD', x, y, int(k))
         else:
             raise Exception(f'Invalid increment: variables differ: {x} {y}')
 
@@ -149,8 +154,8 @@ def readLoopProgram(tokens):
             instructions.append(Init(token.value[0], token.value[1]))
         elif token.type == 'SET':
             instructions.append(Set(token.value[0], token.value[1]))
-        elif token.type == 'INC':
-            instructions.append(Inc(token.value[0]))
+        elif token.type == 'ADD':
+            instructions.append(Add(token.value[0], token.value[1], token.value[2]))
         elif token.type == 'LOOP':
             instructions.append(Loop(token.value[0], readLoopProgram(tokens)))
         elif token.type == 'END':
@@ -173,7 +178,7 @@ def startLoopLang():
         program.execute(state)
         print(state)
     except StopLoopLang:
-        print('++?????++ Out of Cheese Error. Redo From Start.')
+        print('++ Out of Cheese Error ++ Redo From Start ++')
 
 if __name__ == "__main__":
     startLoopLang()
