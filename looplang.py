@@ -109,7 +109,10 @@ def parseLine(line):
 
 def getTokens(file):
     for line in file:
-        yield parseLine(line.strip())
+        line = line.strip()
+        if line and line[0] == '#':
+            continue
+        yield parseLine(line)
 
 def readLoopProgram(tokens):
     instructions = []
@@ -130,7 +133,8 @@ def readLoopProgram(tokens):
 
 def startLoopLang():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--file', type=argparse.FileType('r'), help='LOOP code')
+    parser.add_argument('-f', '--file', type=argparse.FileType('r'), help='LOOP code')
+    parser.add_argument('-x', '--extended', action='store_true', help='Enable eXtended LOOP syntax')
     args = parser.parse_args()
     program = readLoopProgram(getTokens(args.file))
     state = {}
