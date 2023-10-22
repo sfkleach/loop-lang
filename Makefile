@@ -44,8 +44,9 @@ build:
 	$(POETRY) install
 	mkdir -p _build/
 	(cd src; tar cf - looplang) | (cd _build; tar xf -)
-	$(POETRY) run python -m pip freeze > _build/all_requirements.txt
-	grep pushable _build/all_requirements.txt > _build/requirements.txt
+	# $(POETRY) run python -m pip freeze > _build/all_requirements.txt
+	# grep pushable _build/all_requirements.txt > _build/requirements.txt
+	$(POETRY) export --without-hashes -f requirements.txt -o _build/requirements.txt
 	$(POETRY) run python -m pip install -r _build/requirements.txt --target _build/looplang
 	$(POETRY) run python -m zipapp -p "/usr/bin/env python" _build/looplang -o _build/looplang.pyz
 
