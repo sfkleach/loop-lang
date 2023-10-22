@@ -439,13 +439,13 @@ def getTokens(file):
 def main():
     argsp = argparse.ArgumentParser()
     argsp.add_argument('-f', '--file', type=argparse.FileType('r'), default=sys.stdin, help='LOOP code')
-    argsp.add_argument('-x', '--extended', action='store_true', help='enable syntactic sugar')
-    argsp.add_argument('-p', '--plus', action='store_true', help='enable LOOP+ extensions')
+    argsp.add_argument('-S', '--sugar', action='store_true', help='enable syntactic sugar')
+    argsp.add_argument('-N', '--enhanced', action='store_true', help='enable ERROR enhancement')
     args = argsp.parse_args()
-    codeparser = Parser(getTokens(args.file), extended=args.extended, plus=args.plus)
+    codeparser = Parser(getTokens(args.file), extended=args.sugar, plus=args.enhanced)
     code = codeparser.readStatements()
     codeparser.checkComplete()
-    if not args.extended:
+    if not args.sugar:
         code.strictCheck()
     # print(code)
     state: Dict[str, int] = {}

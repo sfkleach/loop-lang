@@ -1,0 +1,7 @@
+# Simple example taken from the README.md file.
+x = 0
+y = x
+y = y + 1
+LOOP y
+  x = x + 1
+END
