@@ -12,6 +12,13 @@ jobs:
     permissions:
       contents: write
     steps:
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    - uses: Gr1N/setup-poetry@v8
+    - run: poetry --version
     - uses: actions/checkout@v3
     - name: build pyz file
       run: |
