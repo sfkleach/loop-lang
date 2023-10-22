@@ -1,7 +1,6 @@
-# loop-lang
+# An Interpreter for the LOOP programming language
 
-This is an implementation of the LOOP programming language, loosely based on the 
-[1967 paper](https://dl.acm.org/doi/pdf/10.1145/800196.806014). LOOP is  summarised on Wikipedia [here](https://en.wikipedia.org/wiki/LOOP_(programming_language)).
+This is an implementation of the LOOP programming language, loosely based on the [1967 paper](https://dl.acm.org/doi/pdf/10.1145/800196.806014). LOOP is  summarised on Wikipedia [here](https://en.wikipedia.org/wiki/LOOP_(programming_language)).
 
 This is a simple implementation to test out some ideas of what happens when  we add some features to the language. We have two sets of extensions:
 
@@ -18,7 +17,7 @@ This is a simple implementation to test out some ideas of what happens when  we 
 
 ## How to use the interpreter
 
-The LOOP interpreter is made available as a single file: `looplang.pyz`. This is a bunch of Python code stuff into [a zip archive that the Python interpreter understands](https://docs.python.org/3/library/zipapp.html).
+The LOOP interpreter is made available as a single file: `looplang.pyz`. This is a bunch of Python code stuffed into [a zip archive that the Python interpreter understands](https://docs.python.org/3/library/zipapp.html). If you want to check the code you can unzip the archive.
 
 ```
 % python3 looplang.pyz --help
