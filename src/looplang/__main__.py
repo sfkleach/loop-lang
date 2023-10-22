@@ -2,7 +2,7 @@ import sys
 import argparse
 import re
 from abc import abstractmethod
-from typing import Callable, Dict
+from typing import Callable, Dict, Union
 from pushable import Pushable
 
 
@@ -261,7 +261,7 @@ class PostfixOptions:
         return self._constructor
 
 
-PrefixParsers: Dict[str, Callable|None] = {}
+PrefixParsers: Dict[str, Union[Callable, None]] = {}
 PostfixParsers: Dict[str, PostfixOptions] = {}
 
 
@@ -331,7 +331,7 @@ class Parser:
             lhs = (postfix_parser.parse)(self, postfix_parser.prec + 1, lhs, postfix_parser.constructor)
         return lhs
 
-    def tryReadStatement(self) -> Statement| None:
+    def tryReadStatement(self) -> Union[Statement, None]:
         if not self._tokens:
             return None
         token = self._tokens.peek()
