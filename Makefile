@@ -41,6 +41,7 @@ clean:
 
 .PHONY: build
 build:
+	$(POETRY) install
 	mkdir -p _build/
 	(cd src; tar cf - looplang) | (cd _build; tar xf -)
 	$(POETRY) run python -m pip freeze > _build/requirements.txt
