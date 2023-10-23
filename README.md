@@ -115,14 +115,34 @@ expression ::= integer
 
 ## Enhanced mode, -N
 
-This mode adds the ERROR instruction to LOOP. It is compatible with the `--sugar` option. When an ERROR is encountered, the interpreter will  immediately stop and report an error:
+This mode adds the ERROR instruction to LOOP. It is compatible with the `--sugar` option. When an ERROR is encountered, the interpreter will  immediately stop and, if a message was supplied, it is printed out to stderr. The interpreter will then exit with status code 1.
 
 Here is the simplest enhanced mode program :) 
 ```
-ERROR
+ERROR "Stop!"
 ```
 
 And this is what happens when you try running it:
 ```bash
 % python3 looplang.pyz -N -f examples/error.loop
+Stop!
+```
+
+The ERROR instruction optionally takes a message. If the message is omitted then the interpreter simply stops with exit code 1.
+
+## Execute code, --execute _CODE_
+
+The `--execute` option allows you to execute some code before loading the file. The idea is that you use this to set-up some registers with initial values. For example, you might implement a program that implements the factorial function. This function uses the register `n` as input and delivers the result in `r`.
+```
+r = 1
+k = 1
+LOOP n
+    r = r * k
+    k = k + 1
+END
+```
+So you could compute the factorial of 5 by invoking the interpreter like this:
+```
+% python looplang.pyz -S -f examples/factorial.loop --execute n=5
+```
 ```
