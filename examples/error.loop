@@ -1,2 +1,2 @@
 # Simple example to verify -p option.
-ERROR
+ERROR "Φ"
