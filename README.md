@@ -4,14 +4,14 @@ This is an implementation of the LOOP programming language, loosely based on the
 
 This is a simple implementation to test out some ideas of what happens when  we add some features to the language. We have two sets of extensions:
 
-- *-s --sugar*: this option allows for normal arithmetic expressions on
+- *-S --sugar*: this option allows for normal arithmetic expressions on
   the right hand side of assignments and the count for loops. These options
   are syntactic sugar in principle, although the interpreter does directly
   implement add and multiply rather than expand them into their much less
   efficient LOOP code. In other words, it is still a primitive recursive
   programming language.
 
-- *-n --enhanced*: this option adds a single new 'instruction' called ERROR.
+- *-N --enhanced*: this option adds a single new 'instruction' called ERROR.
   When ERROR is executed, execution immediately stops and the interpreter
   reports that an error was encountered.
 
