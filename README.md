@@ -144,5 +144,15 @@ END
 So you could compute the factorial of 5 by invoking the interpreter like this:
 ```
 % python looplang.pyz -S -f examples/factorial.loop --execute n=5
+n = 5
+r = 120
+k = 6
 ```
+Instead of newlines, for convenience, you can separate statements with semi-colons.
+
+## Print registers, --print _REGISTERS_
+
+This option allows you specify a comma-separated list of registers to print out at the end of a successful computation. So we can modify the factorial example of the previous section as follows:
+```% python looplang.pyz -S -f examples/factorial.loop --execute n=5 -print r
+r = 120
 ```
