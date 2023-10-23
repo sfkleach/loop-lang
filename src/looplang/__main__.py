@@ -3,6 +3,8 @@ import argparse
 import re
 from abc import abstractmethod
 from typing import Callable, Dict, Union
+from io import StringIO
+
 from pushable import Pushable
 
 
@@ -473,7 +475,8 @@ SCANNER = re.Scanner([
     (r"[a-zA-Z_][\w_]*",    lambda scanner,token:Symbol(token)),
     (r"[-=+*]+",            lambda scanner,token:Symbol(token)),
     (r"[()]",               lambda scanner,token:Symbol(token)),
-    (r'''"([^"]|\")*"''', lambda scanner,token:String(token)),
+    (r'''"([^"]|\")*"''',   lambda scanner,token:String(token)),
+    (r';',                  lambda scanner,token:EndOfLine()),
     (r"\s+",                None),  # None == skip token.
     (r"#.*",                None),  # None == skip token.
 ])
@@ -494,22 +497,30 @@ def getTokens(file):
     for line in file:
         yield from tokenise(line)
 
+def execute(file, state, *, sugar=False, enhanced=False):
+    initialcode = Parser(getTokens(file), extended=sugar, plus=enhanced)
+    icode = initialcode.readStatements()
+    initialcode.checkComplete()
+    if not sugar:
+        icode.strictCheck()
+    icode.execute(state)
+
 def main():
     argsp = argparse.ArgumentParser()
     argsp.add_argument('-f', '--file', type=argparse.FileType('r'), default=sys.stdin, help='LOOP code')
     argsp.add_argument('-S', '--sugar', action='store_true', help='enable syntactic sugar')
     argsp.add_argument('-N', '--enhanced', action='store_true', help='enable ERROR enhancement')
+    argsp.add_argument('-e', '--execute', type=str, default=None, help='Initial statements to execute')
+    argsp.add_argument('-p', '--print', type=str, default=None, help='enable ERROR enhancement')
     args = argsp.parse_args()
-    codeparser = Parser(getTokens(args.file), extended=args.sugar, plus=args.enhanced)
-    code = codeparser.readStatements()
-    codeparser.checkComplete()
-    if not args.sugar:
-        code.strictCheck()
-    # print(code)
+    
     state: Dict[str, int] = {}
     try:
-        code.execute(state)
-        print(state)
+        if args.execute is not None:
+            execute(StringIO(args.execute), state, sugar=args.sugar, enhanced=args.enhanced)
+        execute(args.file, state, sugar=args.sugar, enhanced=args.enhanced)
+        for a in args.print.split(',') if args.print else state.keys():
+            print(a, '=', state[a])
     except StopLoopLang:
         sys.exit(1)
 
