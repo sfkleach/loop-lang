@@ -1,0 +1,6 @@
+r = 1
+k = 1
+LOOP n
+    r = r * k
+    k = k + 1
+END
