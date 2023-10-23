@@ -18,7 +18,6 @@ This is a simple implementation to test out some ideas of what happens when  we 
 ## How to use the interpreter
 
 The LOOP interpreter is made available as a single file: `looplang.pyz`. This is a bunch of Python code stuffed into [a zip archive that the Python interpreter understands](https://docs.python.org/3/library/zipapp.html). If you want to check the code you can unzip the archive.
-
 ```
 % python3 looplang.pyz --help
 usage: looplang [-h] [-f FILE] [-S] [-N] [-e EXECUTE] [-p PRINT]
@@ -37,7 +36,6 @@ options:
 ### Example
 
 LOOP programs consist of simple assignments to arbitarily named variables called  'registers' and the eponymous `LOOP` construct. The assignments must fit one of three exact patterns:
-
 ```
 x = 0       # Assignment to zero (and only zero)
 y = x       # Assignment from another register
@@ -45,7 +43,6 @@ y = y + 1   # Increment of a register (same register on both sides)
 ```
 
 The only control construct is the `LOOP` which fits the following pattern n.b.  line breaks are significant, although indentation is ignored.
-
 ```
 LOOP y
   x = x + 1
@@ -104,12 +101,13 @@ The EBNF grammar looks like this:
 ```
 program ::= statement*
 statement ::= assignment | loop
-assign ::= register '=' expression LINEBREAK
-loop ::= 'LOOP' expression LINEBREAK statement* 'END' LINEBREAK
+assign ::= register '=' expression EOL
+loop ::= 'LOOP' expression EOL statement* 'END' EOL
 expression ::= integer
     | register
     | expression ( '+' | '-' | '*' ) expression
     | '(' expression ')'
+EOL ::= LINEBREAK | ';'
 ```
 
 
@@ -128,7 +126,11 @@ And this is what happens when you try running it:
 Stop!
 ```
 
-The ERROR instruction optionally takes a message. If the message is omitted then the interpreter simply stops with exit code 1.
+The ERROR instruction optionally takes a message. If the message is omitted then the interpreter simply stops with exit code 1. It adds the following grammar rule:
+```
+statement ::= assignment | loop | error
+error ::= 'ERROR' string?
+```
 
 ## Execute code, --execute _CODE_
 
@@ -153,6 +155,7 @@ Instead of newlines, for convenience, you can separate statements with semi-colo
 ## Print registers, --print _REGISTERS_
 
 This option allows you specify a comma-separated list of registers to print out at the end of a successful computation. So we can modify the factorial example of the previous section as follows:
-```% python looplang.pyz -S -f examples/factorial.loop --execute n=5 -print r
+```
+% python looplang.pyz -S -f examples/factorial.loop --execute n=5 -print r
 r = 120
 ```
