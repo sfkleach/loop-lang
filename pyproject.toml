@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "loop-lang"
-version = "0.2.0"
+version = "0.3.0"
 description = "Implementation of the LOOP programming language"
 authors = ["Stephen Leach <sfkleach@gmail.com>"]
 readme = "README.md"
