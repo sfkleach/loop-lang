@@ -21,13 +21,17 @@ The LOOP interpreter is made available as a single file: `looplang.pyz`. This is
 
 ```
 % python3 looplang.pyz --help
-usage: looplang.py [-h] [-f FILE] [-x]
+usage: looplang [-h] [-f FILE] [-S] [-N] [-e EXECUTE] [-p PRINT]
 
 options:
   -h, --help            show this help message and exit
-  -f FILE, --file FILE  LOOP code to be executed
+  -f FILE, --file FILE  LOOP code
   -S, --sugar           enable syntactic sugar
   -N, --enhanced        enable ERROR enhancement
+  -e EXECUTE, --execute EXECUTE
+                        Semi-colon separated initial statements to execute
+  -p PRINT, --print PRINT
+                        Comma-separated list of registers to print
 ```
 
 ### Example
@@ -121,5 +125,4 @@ ERROR
 And this is what happens when you try running it:
 ```bash
 % python3 looplang.pyz -N -f examples/error.loop
-++ Out of Cheese Error ++ Redo From Start ++
 ```
