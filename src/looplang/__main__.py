@@ -56,6 +56,54 @@ class Symbol(Token):
         return str(self)
 
 
+class String(Token):
+
+    def __init__(self, token):
+        self._token = token
+        self._value = ''.join(String.stringify(token))
+
+    def value(self):
+        return self._value
+
+    def __str__(self):
+        return f'<{self._token}>'
+
+    def __repr__(self):
+        return str(self)
+    
+    @staticmethod
+    def stringify(s):
+        # Strip quotes and process escapes.
+        n = 1
+        L = len(s) - 1
+        while n < L:
+            ch = s[n]
+            if ch == '\\':
+                n += 1
+                if n < L:
+                    ch = s[n]
+                    print( 'ESC' , ch)
+                    if ch == 'n':
+                        yield '\n'
+                    elif ch == 'r':
+                        yield '\r'
+                    elif ch == 't':
+                        yield '\t'
+                    elif ch == '"':
+                        yield '"'
+                    elif ch == '\\':
+                        yield '\\'
+                    elif ch == 's':
+                        yield ' '
+                    else:
+                        raise ParseException(f'Unknown escape sequence: {ch}')
+                else:
+                    raise ParseException(f'Unexpected end of string')
+            else:
+                yield ch
+            n += 1
+
+
 class StopLoopLang(Exception):
     pass
 
@@ -117,7 +165,12 @@ class Register(Expression):
 
 class Error(Statement):
 
+    def __init__(self, message=None) -> None:
+        self._message = message
+
     def execute(self, state):
+        if self._message:
+            print( self._message, file=sys.stderr )
         raise StopLoopLang()
 
     def __str__(self):
@@ -282,6 +335,15 @@ class Parser:
     def checkComplete(self):
         if bool(self._tokens):
             raise ParseException(f'Unexpected tokens: {self._tokens.peek()}')
+        
+    def tryReadString(self):
+        if self._tokens:
+            token = self._tokens.peek()
+            if isinstance(token, String):
+                self._tokens.pop()
+                return token.value()
+            else:
+                return None
 
     def mustReadToken(self, expected):
         # print('mustReadToken', expected)
@@ -368,8 +430,9 @@ class Parser:
 
 
 def errorPrefixParser(parser: 'Parser', name: str):
+    msg = parser.tryReadString()
     parser.mustReadEndOfLine()
-    return Error()
+    return Error(message=msg)
 
 def loopPrefixParser(parser: 'Parser', name: str):
     x = parser.readExpression(0)
@@ -405,35 +468,30 @@ PrefixParsers['LOOP'] = loopPrefixParser
 PostfixParsers['+'] = PostfixOptions(1, infixParser, Add)
 
 
+SCANNER = re.Scanner([
+    (r"[0-9]+",             lambda scanner,token:Number(int(token))),
+    (r"[a-zA-Z_][\w_]*",    lambda scanner,token:Symbol(token)),
+    (r"[-=+*]+",            lambda scanner,token:Symbol(token)),
+    (r"[()]",               lambda scanner,token:Symbol(token)),
+    (r'''"([^"]|\")*"''', lambda scanner,token:String(token)),
+    (r"\s+",                None),  # None == skip token.
+    (r"#.*",                None),  # None == skip token.
+])
 
 def tokenise(line):
-    # Strip off comments.
-    line = line.split('#')[0].strip()
-    # Split into tokens.
-    n = 0
-    for m in re.finditer(r'\b', line):
-        e = m.end()
-        if n < e:
-            t = line[n:e].strip()
-            n = e
-            if t:
-                try:
-                    yield Number(int(t))
-                except ValueError:
-                    if t[0].isalnum() or t[0] == '_':
-                        yield Symbol(t)
-                    else:
-                        for s in t:
-                            st = s.strip()
-                            if st:
-                                yield Symbol(st)
-    yield EndOfLine()
+    results, remainder=SCANNER.scan(line)
+    if remainder:
+        raise ParseException(f'Unexpected text at the end of line: {remainder}')
+    someTokens = False
+    for tok in results:
+        if tok:
+            someTokens = True
+            yield tok
+    if someTokens:
+        yield EndOfLine()
 
 def getTokens(file):
     for line in file:
-        line = line.strip()
-        if line and line[0] == '#':
-            continue
         yield from tokenise(line)
 
 def main():
@@ -453,7 +511,7 @@ def main():
         code.execute(state)
         print(state)
     except StopLoopLang:
-        print('++ Out of Cheese Error ++ Redo From Start ++')
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
