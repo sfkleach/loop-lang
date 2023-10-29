@@ -1,0 +1,12 @@
+DEF bad( n ) =>> r
+    gtz = 0
+    LOOP n
+        gtz = 1
+    END
+    r = n
+    LOOP gtz
+        r = bad( n - 1 )
+    END
+END
+
+n = bad(10)

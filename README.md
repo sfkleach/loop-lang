@@ -88,7 +88,11 @@ In this initial implementation, each instruction must be on a separate line. Any
 Harmless extensions to LOOP are enabled through the `-S` flag. These are
 harmless in the sense that they are syntactic sugar that could be expanded into  equivalent strict LOOP code. However the interpreter is free to implement them more efficiently.
 
+### New operators
+
 Sugared mode allows assignment to use three arithmetic operators: `+`, `*` and  `-`. Note that if subtraction would generate a negative number then zero is returned instead. The usual operator precedence rules apply (`*` binds tighter than `+` or `-`) and ordering can be modified by parentheses.
+
+### Loop over an expression
 
 It also allows `LOOP`s to iterate over the value of an arithmetic expression e.g.
 ```
@@ -97,12 +101,36 @@ LOOP x * y
 END
 ```
 
+### Non-recursive function definitions and calls
+
+Finally, it allows for the definition of non-recursive functions. These are defined using the `DEF` keyword. For example, the following program computes the factorial of its argument `n` and stores the result in the register `r`:
+```
+DEF factorial(n) =>> r
+    r = 1
+    m = 1
+    LOOP n
+        r = r * m
+        m = m + 1
+    END
+END
+```
+
+The `DEF` keyword is followed by the name of the function and a list of arguments. The arguments are separated by commas and enclosed in parentheses. Optionally a result register can be given; if one is supplied it should appear after the `=>>` marker. The function body is then given by a sequence of statements, which must end with an `END` instruction.
+
+Functions are called in the usual way, by giving the name of the function and a list of arguments. For example, the following program computes the factorial of 5:
+```
+f5 = factorial(5)
+```
+
+### Sugared Grammar
+
 The EBNF grammar looks like this:
 ```
 program ::= statement*
-statement ::= assignment | loop
+statement ::= assignment | loop | def
 assign ::= register '=' expression EOL
 loop ::= 'LOOP' expression EOL statement* 'END' EOL
+def ::= 'DEF' register '(' register ( ',' register )* ')' ( '=>>' register )? EOL statement* 'END' EOL
 expression ::= integer
     | register
     | expression ( '+' | '-' | '*' ) expression
@@ -154,8 +182,8 @@ Instead of newlines, for convenience, you can separate statements with semi-colo
 
 ## Print registers, --print _REGISTERS_
 
-This option allows you specify a comma-separated list of registers to print out at the end of a successful computation. So we can modify the factorial example of the previous section as follows:
+This option allows you specify a comma-separated list of registers to print out at the end of a successful computation. For example, to print out the value of `r` after computing the factorial of 5, you could run:
 ```
-% python looplang.pyz -S -f examples/factorial.loop --execute n=5 -print r
+% python looplang.pyz -S -f examples/inline_factorial.loop --execute n=5 -print r
 r = 120
 ```
