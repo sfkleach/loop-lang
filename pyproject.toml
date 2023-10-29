@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "loop-lang"
+name = "looplang"
 version = "0.3.0"
 description = "Implementation of the LOOP programming language"
 authors = ["Stephen Leach <sfkleach@gmail.com>"]
