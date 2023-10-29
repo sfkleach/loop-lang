@@ -101,7 +101,7 @@ LOOP x * y
 END
 ```
 
-### Non-recursive function definitions and calls
+### Non-recursive user-defined function definitions and calls
 
 Finally, it allows for the definition of non-recursive functions. These are defined using the `DEF` keyword. For example, the following program computes the factorial of its argument `n` and stores the result in the register `r`:
 ```
@@ -121,6 +121,12 @@ Functions are called in the usual way, by giving the name of the function and a 
 ```
 f5 = factorial(5)
 ```
+
+### Built-in functions
+
+At the time of writing there is only 1 built-in function. 
+
+- `not(x)`: takes a single argument `x` and returns 1 if the `x` is zero and zero otherwise.
 
 ### Sugared Grammar
 
