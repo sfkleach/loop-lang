@@ -38,17 +38,21 @@ POETRY=$(shell command -v poetry)
 .PHONY: clean
 clean:
 	rm -rf _build
+	rm -rf .pytest_cache
+	rm -rf tests/__pycache__
+	rm -rf .mypy_cache
+	rm -rf src/looplang/__pycache__
 
 .PHONY: build
 build:
 	$(POETRY) install
-	mkdir -p _build/
-	(cd src; tar cf - looplang) | (cd _build; tar xf -)
+	mkdir -p _build/looplangapp/
+	(cd src; tar cf - looplang) | (cd _build/looplangapp; tar xf -)
 	# $(POETRY) run python -m pip freeze > _build/all_requirements.txt
 	# grep pushable _build/all_requirements.txt > _build/requirements.txt
 	$(POETRY) export --without-hashes -f requirements.txt -o _build/requirements.txt
-	$(POETRY) run python -m pip install -r _build/requirements.txt --target _build/looplang
-	$(POETRY) run python -m zipapp -p "/usr/bin/env python" _build/looplang -o _build/looplang.pyz
+	$(POETRY) run python -m pip install -r _build/requirements.txt --target _build/looplangapp
+	$(POETRY) run python -m zipapp -p "/usr/bin/env python" _build/looplangapp -m 'looplang:main' -o _build/looplang.pyz
 
 .PHONY: test
 test:
