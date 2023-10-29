@@ -1,6 +1,10 @@
-r = 1
-k = 1
-LOOP n
-    r = r * k
-    k = k + 1
+DEF f(n) =>> r
+    r = 1
+    m = 1
+    LOOP n
+        r = r * m
+        m = m + 1
+    END
 END
+
+f5 = f(5)

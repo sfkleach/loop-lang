@@ -53,8 +53,20 @@ def test_example_error():
             state = {}
             looplang.execute(program, state, sugar=False, enhanced=True)
 
-def test_example_error_factorial():
-    with open('examples/factorial.loop', 'r') as program:
+def test_example_error_inline_factorial():
+    with open('examples/inline_factorial.loop', 'r') as program:
         state = dict(n = 5)
         looplang.execute(program, state, sugar=True, enhanced=False)
         assert 120 == state['r']
+
+def test_example_error_factorial():
+    with open('examples/factorial.loop', 'r') as program:
+        state = {}
+        looplang.execute(program, state, sugar=True, enhanced=False)
+        assert 120 == state['f5']
+
+def test_example_failed_recursion():
+    with pytest.raises(looplang.ResolveException):
+        with open('examples/failed_recursion.loop', 'r') as program:
+            state = {}
+            looplang.execute(program, state, sugar=True, enhanced=False)
