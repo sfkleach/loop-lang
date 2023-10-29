@@ -145,7 +145,7 @@ class LocalScope(Scope):
         self._parent = parent
 
     def define(self, name: str):
-        pass
+        raise ResolveException(f'Cannot define function {name} in a local scope')
 
     def isDefined(self, name: str):
         return self._parent.isDefined(name)

@@ -126,8 +126,8 @@ f5 = factorial(5)
 
 The EBNF grammar looks like this:
 ```
-program ::= statement*
-statement ::= assignment | loop | def
+program ::= (statement | def)*
+statement ::= assignment | loop
 assign ::= register '=' expression EOL
 loop ::= 'LOOP' expression EOL statement* 'END' EOL
 def ::= 'DEF' register '(' register ( ',' register )* ')' ( '=>>' register )? EOL statement* 'END' EOL
