@@ -384,19 +384,26 @@ class Lambda(Expression):
     
     def resolve(self, scope: Scope):
         return self._body.resolve(scope)
+    
+BUILTINS = {
+    'not': lambda state, x: 0 if x else 1
+}
 
 class Call(Expression):
 
     def __init__(self, name: str, args: Tuple[Expression, ...]):
         self._name: str = name
+        self._action = BUILTINS[ name ] if name in BUILTINS else None
         self._args: Tuple[Expression, ...] = args
 
     def evaluate(self, state):
-        func = state[self._name]
-        return func.callLambda(state, *(e.evaluate(state) for e in self._args))
+        if self._action is None:
+            func = state[self._name]
+            self._action = func.callLambda
+        return self._action(state, *(e.evaluate(state) for e in self._args))
     
     def resolve(self, scope: Scope):
-        if not scope.isDefined(self._name):
+        if not self._name in BUILTINS and not scope.isDefined(self._name):
             raise ResolveException(f'Trying to call undefined function {self._name}')
 
 class Loop(Statement):
