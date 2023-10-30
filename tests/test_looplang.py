@@ -70,3 +70,9 @@ def test_example_failed_recursion():
         with open('examples/failed_recursion.loop', 'r') as program:
             state = {}
             looplang.execute(program, state, sugar=True, enhanced=False)
+
+def test_example_rem():
+    with open('examples/rem.loop', 'r') as program:
+        state = {}
+        looplang.execute(program, state, sugar=True, enhanced=False)
+        assert 5 == state['result']

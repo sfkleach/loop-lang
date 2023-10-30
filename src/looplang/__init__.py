@@ -428,6 +428,28 @@ class Loop(Statement):
     def resolve(self, scope: Scope):
         self._body.resolve(scope)
 
+class If(Statement):
+
+    def __init__(self, cases: Tuple[Tuple[Expression, Statement]]):
+        self._cases = cases
+
+    def execute(self, state):
+        for expr, body in self._cases:
+            if expr.evaluate(state):
+                body.execute(state)
+                break
+
+    def __str__(self):
+        return f'IF {self._cases}'
+    
+    def strictCheck(self):
+        raise StrictCheckException(f'Conditionals (IF) are not permitted in strict mode')
+
+    def resolve(self, scope: Scope):
+        for expr, body in self._cases:
+            expr.resolve(scope)
+            body.resolve(scope)
+
 class Body(Statement):
 
     def __init__(self, statements):
@@ -484,6 +506,7 @@ class Parser:
             self._prefix_parsers['ERROR'] = errorPrefixParser
         if extended:
             self._prefix_parsers['DEF'] = defPrefixParser
+            self._prefix_parsers['IF'] = ifPrefixParser
             self._prefix_parsers['('] = parenthesisPrefixParser
             self._prefix_parsers[')'] = None
             self._postfix_parsers['*'] = PostfixOptions(2, infixParser, Mul)
@@ -615,11 +638,13 @@ def errorPrefixParser(parser: 'Parser', name: str):
     return Error(message=msg)
 
 def defPrefixParser(parser: 'Parser', name: str):
+    print('DEF', str)
     params: List[str] = []
     funcName = parser.readAnySymbolToken()
     parser.mustReadSymbolToken('(')
     while not parser.tryReadSymbolToken(')'):
         token = parser._tokens.peekOr()
+        print('PEEK', token)
         if isinstance(token, Symbol):
             params.append(token.name())
             parser._tokens.pop()
@@ -654,6 +679,25 @@ def loopPrefixParser(parser: 'Parser', name: str):
     parser.mustReadEndOfLine()
     return Loop(x, Body(body))
 
+def ifPrefixParser(parser: 'Parser', name: str):
+    expr = parser.readExpression(0)
+    parser.mustReadEndOfLine()
+    stmnts = parser.readStatements()
+    cases = [(expr, stmnts)]
+    while parser.tryReadSymbolToken('ELSEIF'):
+        expr = parser.readExpression(0)
+        parser.mustReadEndOfLine()
+        stmnts = parser.readStatements()
+        cases.append((expr, stmnts))
+    if parser.tryReadSymbolToken('ELSE'):
+        parser.mustReadEndOfLine()
+        stmnts = parser.readStatements()
+        cases.append((Constant(1), stmnts))
+    parser.mustReadSymbolToken('END')
+    parser.mustReadEndOfLine()
+    return If(tuple(cases))
+
+
 def parenthesisPrefixParser(parser: 'Parser', name: str):
     expr = parser.readExpression(0)
     parser.mustReadSymbolToken(')')
@@ -681,6 +725,7 @@ def infixParser(parser, prec, lhs, constructor):
 # Punctuation.
 PrefixParsers['='] = None
 PrefixParsers['END'] = None
+PrefixParsers['ELSEIF'] = None
 
 # Prefix codelets.
 PrefixParsers['LOOP'] = loopPrefixParser
@@ -693,7 +738,7 @@ SCANNER = re.Scanner([      # type: ignore
     (r"[0-9]+",             lambda scanner,token:Number(int(token))),
     (r"[a-zA-Z_][\w_]*",    lambda scanner,token:Symbol(token)),
     (r"[-=+*>]+",           lambda scanner,token:Symbol(token)),
-    (r"[()]",               lambda scanner,token:Symbol(token)),
+    (r"[,()]",              lambda scanner,token:Symbol(token)),
     (r'''"([^"]|\")*"''',   lambda scanner,token:String(token)),
     (r';',                  lambda scanner,token:EndOfLine()),
     (r"\s+",                None),  # None == skip token.

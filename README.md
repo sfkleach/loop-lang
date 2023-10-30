@@ -101,6 +101,35 @@ LOOP x * y
 END
 ```
 
+### Conditional execution
+
+It also allows for conditional execution of statements. This is done using the `IF` keyword. The typical pattern is:
+```
+IF x
+  y = y + 1
+ELSEIF y
+  x = x + 1
+ELSE
+  x = x + 1
+  y = y + 1
+END
+```
+
+For example, the following program computes the remainder of n mod d.
+```
+DEF rem( n, d ) =>> r
+    r = n
+    LOOP n
+        IF r - d
+            r = r - d
+        END
+    END
+    IF not(d - r)
+        r = 0
+    END
+END
+```
+
 ### Non-recursive user-defined function definitions and calls
 
 Finally, it allows for the definition of non-recursive functions. These are defined using the `DEF` keyword. For example, the following program computes the factorial of its argument `n` and stores the result in the register `r`:

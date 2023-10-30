@@ -1,0 +1,13 @@
+DEF rem( n, d ) =>> r
+    r = n
+    LOOP n
+        IF r - d
+            r = r - d
+        END
+    END
+    IF not(d - r)
+        r = 0
+    END
+END
+
+result = rem( 19, 7 )
